@@ -128,6 +128,28 @@
     width: 220px; text-transform: uppercase;
     font-weight: 700;
   }
+  .join-input-row {
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  #clear-code-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.18);
+    color: rgba(243,234,213,0.7);
+    font-size: 14px; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 150ms ease, color 150ms ease;
+  }
+  #clear-code-btn:active { background: rgba(255,255,255,0.2); color: #ffe9a7; }
+  .join-help {
+    font-size: 11px; color: rgba(243,234,213,0.5);
+    text-align: center; max-width: 280px; line-height: 1.4;
+    margin-bottom: 22px;
+  }
   #name-input { width: 260px; margin-bottom: 18px; }
 
   /* Lobby player list */
@@ -187,8 +209,8 @@
   #banner .prompt.your-turn { color: #ffe9a7; }
 
   #table {
-    position: relative; flex: 0 0 40%;
-    min-height: 220px; padding: 8px 12px 4px;
+    position: relative; flex: 0 0 50%;
+    min-height: 240px; padding: 12px 12px 8px;
   }
   #opponents { position: relative; width: 100%; height: 100%; }
 
@@ -333,52 +355,31 @@
     to   { opacity: 1; transform: translateY(0) scale(1); }
   }
 
-  /* Action row (above the hand) */
-  #action-row {
-    position: relative; flex: 0 0 auto; height: 50px; z-index: 15;
+  /* Hand area — name above cards, full fan always visible at the bottom */
+  #hand-area {
+    flex: 1; position: relative;
+    min-height: 180px;
+    display: flex; flex-direction: column;
+    overflow: hidden;
   }
-  #action-bar {
-    position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
-    display: flex; gap: 10px;
-  }
-  #action-bar button {
-    background: linear-gradient(180deg, #f4d27a 0%, #d9a74a 100%);
-    color: #2a1c06; font-weight: 700; font-size: 15px;
-    padding: 10px 22px; border-radius: 999px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.5);
-    opacity: 0; transform: translateY(8px);
-    transition: opacity 200ms ease, transform 200ms ease;
+  #player-footer {
+    flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 16px 4px;
+    font-size: 13px; color: rgba(243,234,213,0.7);
     pointer-events: none;
   }
-  #action-bar button.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
-  #action-bar button.cancel {
-    background: rgba(255,255,255,0.18);
-    color: #f3ead5;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  #player-footer .you-name { color: #ffe9a7; font-weight: 700; font-size: 14px; }
+  #player-footer .you-score {
+    color: #ffe9a7; font-weight: 700; font-size: 15px;
+    transition: transform 200ms ease; display: inline-block;
   }
-  #action-bar button:active { transform: translateY(1px) scale(0.97); }
-
-  /* Hand area */
-  #hand-area {
-    flex: 1; position: relative; min-height: 180px; overflow: visible;
-  }
+  #player-footer .you-score.pop { animation: setPopNumber 700ms ease; }
   #hand {
-    position: absolute; left: 50%; bottom: 0;
-    height: 100%; width: 100%;
-    transform: translate(-50%, 60%);
+    position: relative; flex: 1;
     transition: transform 380ms cubic-bezier(0.34, 1.35, 0.55, 1);
   }
-  #hand.raised { transform: translate(-50%, -4%); }
-  #player-footer {
-    position: absolute; left: 0; right: 0; top: 0;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 4px 14px 0;
-    font-size: 12px; color: rgba(243,234,213,0.7);
-    pointer-events: none;
-  }
-  #player-footer .you-name { color: #ffe9a7; font-weight: 700; font-size: 13px; }
-  #player-footer .you-score { color: #ffe9a7; font-weight: 700; transition: transform 200ms ease; display: inline-block; }
-  #player-footer .you-score.pop { animation: setPopNumber 700ms ease; }
+  #hand.raised { transform: translateY(-10px); }
 
   /* Cards */
   .card {
@@ -599,10 +600,14 @@
   <div id="join-screen" class="screen hidden">
     <h2>Enter Room Code</h2>
     <div class="sub">Ask the dealer for the 4-character code.</div>
-    <input id="join-code-input" placeholder="XXXX" maxlength="4" autocomplete="off" autocapitalize="characters" />
-    <div style="height:18px"></div>
+    <div class="join-input-row">
+      <input id="join-code-input" placeholder="XXXX" maxlength="4" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" />
+      <button id="clear-code-btn" type="button" aria-label="Clear code">✕</button>
+    </div>
+    <div class="join-help">Tap the code to edit, or use ✕ to clear it.</div>
     <div class="btn-col">
-      <button id="join-confirm-btn" class="primary-btn" disabled>Join Game</button>
+      <button id="join-confirm-btn" class="primary-btn">Join Game</button>
+      <button id="join-different-btn" class="secondary-btn">Join Different Game</button>
       <button id="join-back-btn" class="ghost-btn">Back</button>
     </div>
     <div id="join-status" class="status"></div>
@@ -638,13 +643,6 @@
           <div class="stack-card card back" style="transform: translate(3px, -2px) rotate(4deg);"></div>
           <div class="count-badge" id="draw-count">52 left</div>
         </div>
-        <div id="sets-row"></div>
-      </div>
-    </div>
-    <div id="action-row">
-      <div id="action-bar">
-        <button id="cancel-btn" class="cancel">Cancel</button>
-        <button id="ask-btn">Ask!</button>
       </div>
     </div>
     <div id="hand-area">
@@ -738,12 +736,11 @@ const el = {};
 function grabEls() {
   const ids = [
     'start-screen','name-input','create-btn','show-join-btn','start-status',
-    'join-screen','join-code-input','join-confirm-btn','join-back-btn','join-status',
+    'join-screen','join-code-input','join-confirm-btn','join-back-btn','join-status','clear-code-btn','join-different-btn',
     'lobby-screen','lobby-title','lobby-sub','room-code-big','lobby-players',
     'start-game-btn','lobby-leave-btn','lobby-status',
     'game-screen','banner','turn-name','prompt',
-    'table','opponents','draw-pile','draw-count','sets-row',
-    'action-row','action-bar','cancel-btn','ask-btn',
+    'table','opponents','draw-pile','draw-count',
     'hand-area','hand','you-name','you-score',
     'modal-backdrop','modal','asker-name','ask-main','modal-sub','modal-primary-btn',
     'gameover-backdrop','winner-name','final-scores','rematch-btn',
@@ -1158,8 +1155,19 @@ function hostDeal() {
   for (const seat of Object.keys(H.seats)) {
     hostSendTo(+seat, { type: 'deal', yourHand: H.seats[+seat].hand.slice(), counts: hostCounts(), deckCount: H.deck.length });
   }
-  // After deal animation would complete, start first turn
-  setTimeout(() => hostStartTurn(), 400 + 150 * Object.keys(H.seats).length * INIT_HAND_SIZE(Object.keys(H.seats).length) + 300);
+  const dealTime = 400 + 150 * Object.keys(H.seats).length * INIT_HAND_SIZE(Object.keys(H.seats).length) + 300;
+  // After deal animations finish, auto-lay-down any starting pairs and then start the first turn.
+  setTimeout(() => {
+    for (const seat of Object.keys(H.seats).map(Number)) {
+      const newSets = collectSetsHost(H.seats[seat]);
+      for (const set of newSets) hostBroadcastAll({ type: 'set-event', seat, rank: set.rank });
+    }
+    // Update everyone's hand counts after starting pairs are pulled out
+    for (const seat of Object.keys(H.seats).map(Number)) {
+      hostSendTo(seat, { type: 'hand-update', yourHand: H.seats[seat].hand.slice(), counts: hostCounts(), deckCount: H.deck.length });
+    }
+    setTimeout(() => hostStartTurn(), 1000);
+  }, dealTime);
 }
 
 function hostCounts() {
@@ -1322,22 +1330,27 @@ function hostEndTurn() {
   hostStartTurn();
 }
 function collectSetsHost(player) {
+  // House rule: a "set" is a PAIR (2 of a rank), not all four. As soon as a player holds two,
+  // they lay them down and score 1 set. With 13 ranks × 2 pairs per rank, max 26 sets per game.
   const byRank = {};
   for (const c of player.hand) (byRank[c.rank] ||= []).push(c);
   const newSets = [];
   for (const r of Object.keys(byRank)) {
-    if (byRank[r].length === 4) newSets.push({ rank: r, cards: byRank[r] });
+    while (byRank[r].length >= 2) {
+      const pair = byRank[r].splice(0, 2);
+      newSets.push({ rank: r, cards: pair });
+    }
   }
-  for (const set of newSets) {
-    const ids = new Set(set.cards.map(c => c.id));
-    player.hand = player.hand.filter(c => !ids.has(c.id));
-    player.sets.push(set);
-  }
+  const idsToRemove = new Set();
+  for (const s of newSets) for (const c of s.cards) idsToRemove.add(c.id);
+  player.hand = player.hand.filter(c => !idsToRemove.has(c.id));
+  for (const s of newSets) player.sets.push(s);
   return newSets;
 }
 function hostIsGameOver() {
   const totalSets = Object.values(H.seats).reduce((a, s) => a + s.sets.length, 0);
-  if (totalSets >= 13) return true;
+  // 13 ranks × 2 pairs per rank = 26 max sets across all players
+  if (totalSets >= 26) return true;
   if (H.deck.length === 0 && Object.values(H.seats).some(s => s.hand.length === 0)) return true;
   if (H.deck.length === 0) {
     // No two players share any rank?
@@ -1438,16 +1451,7 @@ function refreshOpponents() {
 }
 
 function renderSets() {
-  el.setsRow.innerHTML = '';
-  for (const s of C.completedSets.slice(-10)) {
-    const chip = document.createElement('div');
-    chip.className = 'set-chip';
-    chip.innerHTML = `
-      <div class="set-mini-card black">${s.rank}</div>
-      <span style="color:${s.ownerColor}">${initialsFor(s.ownerName)}</span>
-    `;
-    el.setsRow.appendChild(chip);
-  }
+  // Sets are tallied per-player on each avatar — no central row.
 }
 
 function updateDrawPile() {
@@ -1511,9 +1515,7 @@ function setBanner(turnName, prompt, isYourTurn) {
 }
 function setPrompt(html) { el.prompt.innerHTML = html; }
 function showButtons(which) {
-  for (const [btn, key] of [[el.askBtn,'ask'],[el.cancelBtn,'cancel']]) {
-    btn.classList.toggle('visible', which.has(key));
-  }
+  // No-op — Ask/Cancel buttons removed; auto-ask fires as soon as player + card are both selected.
 }
 function setHandRaised(raised) {
   handRaised = raised;
@@ -1541,9 +1543,9 @@ function getDrawPileAnchor() {
   const r = el.drawPile.getBoundingClientRect();
   return { x: r.left + r.width/2, y: r.top + r.height/2 };
 }
-function getSetsAnchor() {
-  const r = el.setsRow.getBoundingClientRect();
-  return { x: r.left + r.width/2, y: r.top + r.height/2 + 4 };
+function getSetsAnchor(seat) {
+  // Sets fly to the owner's avatar (or self's footer for the local player)
+  return getSeatAnchor(seat);
 }
 
 function flyCard({ from, to, face='back', card=null, duration=ANIM.pass.duration, flip=false, rotDeg=0 }) {
@@ -1840,15 +1842,20 @@ async function onDrawEvent(m) {
 }
 
 async function onSetEvent(m) {
+  // Pair lay-down: 2 cards fly from the player's hand area into their own avatar tally.
+  // For the local player ("self"), source = their hand; destination = their score footer.
+  // For remote players, both source and destination are their avatar (cards visually merge into the count).
   const from = getSeatAnchor(m.seat);
-  const to   = getSetsAnchor();
+  const to   = m.seat === C.mySeat
+    ? (() => { const r = el.playerFooter.getBoundingClientRect(); return { x: r.right - 40, y: r.top + r.height/2 }; })()
+    : getSeatAnchor(m.seat);
   audio.play('setClack');
-  // Animate 4 cards flying to the sets row
   const flights = [];
-  for (let i = 0; i < 4; i++) {
-    flights.push(sleep(i*60).then(() => flyCard({
+  // 2 cards (pair)
+  for (let i = 0; i < 2; i++) {
+    flights.push(sleep(i*70).then(() => flyCard({
       from, to, face: m.seat === C.mySeat ? 'face' : 'back',
-      card: { id: `s${i}`, rank: m.rank, suit: SUITS[i] },
+      card: { id: `s${m.rank}${i}`, rank: m.rank, suit: SUITS[i] },
       flip: m.seat !== C.mySeat,
       duration: ANIM.setLayDown.duration,
       rotDeg: (Math.random()-0.5)*30
@@ -1862,10 +1869,9 @@ async function onSetEvent(m) {
     C.completedSets.push({ rank: m.rank, ownerSeat: m.seat, ownerName: pl.name, ownerColor: pl.color });
   }
   refreshOpponents();
-  renderSets();
   updateScores();
   const who = m.seat === C.mySeat ? 'You' : (pl ? pl.name : 'A player');
-  toast(`${who} laid down ${RANK_LABEL[m.rank]}  ·  ${pl ? pl.sets : ''} set${pl && pl.sets === 1 ? '' : 's'}`, 2400);
+  toast(`${who} matched ${RANK_LABEL[m.rank]}  ·  ${pl ? pl.sets : ''} set${pl && pl.sets === 1 ? '' : 's'}`, 2400);
 }
 
 function onHandUpdate(m) {
@@ -1964,21 +1970,41 @@ function sendToHost(msg) {
   }
 }
 
+function maybeAutoAsk() {
+  // If both a target and a rank are selected, fire the ask immediately. Two-tap UX.
+  if (C.selection.targetSeat != null && C.selection.rank) {
+    const targetSeat = C.selection.targetSeat;
+    const rank = C.selection.rank;
+    sendToHost({ type: 'ask', targetSeat, rank });
+    C.selection = { targetSeat: null, rank: null, cardId: null };
+    for (const d of el.opponents.querySelectorAll('.opponent')) d.classList.remove('target');
+    renderHand();
+  }
+}
+
 function onOpponentTap(seat) {
   if (C.status !== 'IN_PROGRESS') return;
   if (C.turnSeat !== C.mySeat) return;
   if (C.turnPhase !== 'CHOOSE_TARGET' && C.turnPhase !== 'CHOOSE_RANK') return;
+  // Tap same player twice → deselect
+  if (C.selection.targetSeat === seat) {
+    C.selection.targetSeat = null;
+    for (const d of el.opponents.querySelectorAll('.opponent')) d.classList.remove('target');
+    setPrompt(C.selection.rank
+      ? `Tap a player to ask for <span class="rank-pill ${SUIT_COLOR[C.selection._rankSuit] || 'black'}">${C.selection.rank}</span>`
+      : 'Tap a player to ask');
+    return;
+  }
   C.selection.targetSeat = seat;
   for (const d of el.opponents.querySelectorAll('.opponent')) {
     d.classList.toggle('target', (+d.dataset.seat) === seat);
   }
   const target = C.players.find(p => p.seat === seat);
   if (C.selection.rank) {
-    setPrompt(`Ask <b>${escapeHTML(target.name)}</b> for <span class="rank-pill ${SUIT_COLOR[C.selection._rankSuit] || 'black'}">${C.selection.rank}</span>?`);
-    showButtons(new Set(['ask','cancel']));
+    setPrompt(`Asking <b>${escapeHTML(target.name)}</b> for <span class="rank-pill ${SUIT_COLOR[C.selection._rankSuit] || 'black'}">${C.selection.rank}</span>…`);
+    maybeAutoAsk();
   } else {
-    setPrompt(`Tap a card for the rank to ask ${escapeHTML(target.name)}`);
-    showButtons(new Set(['cancel']));
+    setPrompt(`Now tap one of your cards to pick a rank to ask ${escapeHTML(target.name)}`);
   }
 }
 
@@ -1986,6 +2012,7 @@ function onHandCardTap(card) {
   if (C.status !== 'IN_PROGRESS') return;
   if (C.turnSeat !== C.mySeat) return;
   if (C.turnPhase !== 'CHOOSE_TARGET' && C.turnPhase !== 'CHOOSE_RANK') return;
+  // Tap same card twice → deselect
   if (C.selection.cardId === card.id) {
     C.selection.cardId = null;
     C.selection.rank = null;
@@ -1993,11 +2020,10 @@ function onHandCardTap(card) {
     renderHand();
     if (C.selection.targetSeat != null) {
       const t = C.players.find(p => p.seat === C.selection.targetSeat);
-      setPrompt(`Tap a card for the rank to ask ${escapeHTML(t.name)}`);
+      setPrompt(`Now tap one of your cards to pick a rank to ask ${escapeHTML(t.name)}`);
     } else {
       setPrompt('Tap a player to ask');
     }
-    showButtons(C.selection.targetSeat != null ? new Set(['cancel']) : new Set());
     return;
   }
   C.selection.cardId = card.id;
@@ -2006,29 +2032,21 @@ function onHandCardTap(card) {
   renderHand();
   if (C.selection.targetSeat != null) {
     const t = C.players.find(p => p.seat === C.selection.targetSeat);
-    setPrompt(`Ask <b>${escapeHTML(t.name)}</b> for <span class="rank-pill ${SUIT_COLOR[card.suit]}">${card.rank}</span>?`);
-    showButtons(new Set(['ask','cancel']));
+    setPrompt(`Asking <b>${escapeHTML(t.name)}</b> for <span class="rank-pill ${SUIT_COLOR[card.suit]}">${card.rank}</span>…`);
+    maybeAutoAsk();
   } else {
     setPrompt(`Tap a player to ask for <span class="rank-pill ${SUIT_COLOR[card.suit]}">${card.rank}</span>`);
-    showButtons(new Set(['cancel']));
   }
 }
 
+// Kept as no-ops for any leftover callers
 function cancelSelection() {
   C.selection = { targetSeat: null, rank: null, cardId: null };
   for (const d of el.opponents.querySelectorAll('.opponent')) d.classList.remove('target');
   renderHand();
   setPrompt('Tap a player to ask');
-  showButtons(new Set());
 }
-
-function confirmAsk() {
-  if (C.selection.targetSeat == null || !C.selection.rank) return;
-  sendToHost({ type: 'ask', targetSeat: C.selection.targetSeat, rank: C.selection.rank });
-  C.selection = { targetSeat: null, rank: null, cardId: null };
-  for (const d of el.opponents.querySelectorAll('.opponent')) d.classList.remove('target');
-  showButtons(new Set());
-}
+function confirmAsk() { maybeAutoAsk(); }
 
 function confirmDraw() {
   if (C.turnSeat !== C.mySeat) return;
@@ -2070,7 +2088,6 @@ function goToStart() {
   el.borderGlow.classList.remove('active');
   el.hand.innerHTML = '';
   el.opponents.innerHTML = '';
-  el.setsRow.innerHTML = '';
   el.animLayer.innerHTML = '';
 }
 
@@ -2098,17 +2115,37 @@ function wireStart() {
     C.myName = name.substring(0, 12);
     el.startStatus.textContent = '';
     showScreen('join-screen');
+    el.joinStatus.textContent = '';
+    el.joinStatus.classList.remove('error');
   });
   el.joinCodeInput.addEventListener('input', (ev) => {
     ev.target.value = ev.target.value.toUpperCase().replace(/[^A-Z2-9]/g, '').slice(0, 4);
-    el.joinConfirmBtn.disabled = ev.target.value.length !== 4;
+    // Button stays enabled regardless — we validate on click
+    el.joinStatus.textContent = '';
+    el.joinStatus.classList.remove('error');
   });
+  // Tap-to-edit: select-all on focus so typing immediately overwrites the previous code
+  el.joinCodeInput.addEventListener('focus', (ev) => {
+    setTimeout(() => ev.target.select(), 50);
+  });
+  function clearJoinCode() {
+    el.joinCodeInput.value = '';
+    el.joinStatus.textContent = '';
+    el.joinStatus.classList.remove('error');
+    el.joinCodeInput.focus();
+  }
+  el.clearCodeBtn.addEventListener('click', clearJoinCode);
+  el.joinDifferentBtn.addEventListener('click', clearJoinCode);
   el.joinConfirmBtn.addEventListener('click', () => {
     const code = el.joinCodeInput.value.trim().toUpperCase();
-    if (code.length !== 4) return;
+    if (code.length !== 4) {
+      el.joinStatus.textContent = 'Enter the 4-character room code first.';
+      el.joinStatus.classList.add('error');
+      el.joinCodeInput.focus();
+      return;
+    }
     el.joinStatus.textContent = 'Connecting…';
     el.joinStatus.classList.remove('error');
-    el.joinConfirmBtn.disabled = true;
     clientJoinRoom(code);
   });
   el.joinBackBtn.addEventListener('click', () => {
@@ -2120,8 +2157,6 @@ function wireStart() {
   el.startGameBtn.addEventListener('click', () => {
     hostStartGame();
   });
-  el.askBtn.addEventListener('click', confirmAsk);
-  el.cancelBtn.addEventListener('click', cancelSelection);
   el.drawPile.addEventListener('click', () => {
     if (el.drawPile.classList.contains('pulse')) confirmDraw();
   });
